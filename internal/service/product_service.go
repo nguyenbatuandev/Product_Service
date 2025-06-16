@@ -35,16 +35,29 @@ func (s *ProductService) CreateProduct(product *entity.Product) (*entity.Product
 	} else {
 		log.Printf("Successfully cached product with key: %s", cacheKey)
 	}
-	_ = s.cacheService.DeletePattern("products:all")
+	_ = s.cacheService.Delete("products:all")
 
 	return product, nil
 }
 
 func (s *ProductService) GetProductByID(id uuid.UUID) (*entity.Product, error) {
+	cacheKey := fmt.Sprintf("product:%s", id.String())
+	var cachedProduct *entity.Product
+	if s.cacheService.Exists(cacheKey) {
+		if err := s.cacheService.Get(cacheKey, &cachedProduct); err == nil {
+			return cachedProduct, nil
+		}
+	}
+
 	product, err := s.productRepo.GetProductByID(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("product not found: " + err.Error())
 	}
+
+	if err := s.cacheService.Set(cacheKey, product, 60*time.Minute); err != nil {
+		log.Printf("Failed to cache product %s: %v", id.String(), err)
+	}
+
 	return product, nil
 }
 

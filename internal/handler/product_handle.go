@@ -33,7 +33,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 	product.Id = uuid.New()
-	product.UserCratedId = userId.(uuid.UUID)
+	product.CreatedId = userId.(uuid.UUID)
 	createdProduct, err := h.productService.CreateProduct(&product)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, entity.ErrorResponse{Error: err.Error()})
@@ -100,7 +100,7 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	}
 
 	// So sánh user_id và partner_id
-	if existingProduct.UserCratedId != userId {
+	if existingProduct.CreatedId != userId {
 		c.JSON(http.StatusForbidden, entity.ErrorResponse{Error: "You are not authorized to update this product"})
 		return
 	}
@@ -151,7 +151,7 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	}
 
 	// So sánh user_id và partner_id
-	if existingProduct.UserCratedId != userId {
+	if existingProduct.CreatedId != userId {
 		c.JSON(http.StatusForbidden, entity.ErrorResponse{Error: "You are not authorized to delete this product"})
 		return
 	}
@@ -205,7 +205,10 @@ func (h *ProductHandler) DeleteProductByAdmin(c *gin.Context) {
 	}
 
 	// Gọi service để xóa sản phẩm
-	h.productService.DeleteProductByAdmin(id)
+	if err := h.productService.DeleteProductByAdmin(id); err != nil {
+		c.JSON(http.StatusInternalServerError, entity.ErrorResponse{Error: err.Error()})
+		return
+	}
 
 	// Trả về kết quả thành công
 	c.JSON(http.StatusOK, entity.SuccessResponse{

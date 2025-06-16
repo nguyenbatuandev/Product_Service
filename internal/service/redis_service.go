@@ -16,8 +16,8 @@ func NewRedisService(addr string, password string, db int) *RedisService {
 	}
 }
 
-func (s *RedisService) Set(key string, value interface{}, expiration time.Duration) error {
-	return s.redisClient.Set(key, value, expiration)
+func (s *RedisService) Set(key string, dest interface{}, expiration time.Duration) error {
+	return s.redisClient.Set(key, dest, expiration)
 }
 
 func (s *RedisService) Get(key string, dest interface{}) error {

@@ -3,10 +3,10 @@ package entity
 import "github.com/google/uuid"
 
 type Product struct {
-	Id           uuid.UUID `json:"id" gorm:"primaryKey;type:uuid"`
-	Name         string    `json:"name" gorm:"not null;unique"`
-	Description  string    `json:"description" gorm:"not null"`
-	UserCratedId uuid.UUID `json:"user_created_id" gorm:"not null;type:uuid"`
-	Price        float64   `json:"price" gorm:"not null"`
-	Image        string    `json:"image" gorm:"not null"`
+	Id          uuid.UUID `json:"id" gorm:"primaryKey;type:uuid"`
+	Name        string    `json:"name" gorm:"not null;unique"`
+	Description string    `json:"description" gorm:"not null"`
+	CreatedId   uuid.UUID `json:"user_created_id" gorm:"not null;type:uuid"`
+	Price       float64   `json:"price" gorm:"not null"`
+	Image       string    `json:"image" gorm:"not null"`
 }

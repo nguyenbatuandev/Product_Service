@@ -2,14 +2,15 @@ package service
 
 import (
 	"Product_Service/internal/entity"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/google/uuid"
 	"errors"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 )
 
 type JWTauthService struct {
-	secretKey       []byte
+	secretKey []byte
 }
 
 func NewJWTauthService(secretKey string) *JWTauthService {
@@ -35,7 +36,7 @@ func (s *JWTauthService) ValidateToken(tokenString string) (*entity.Claims, erro
 		return nil, errors.New("invalid token claims")
 	}
 
-		exp, ok := claims["exp"].(float64)
+	exp, ok := claims["exp"].(float64)
 	if !ok {
 		return nil, errors.New("invalid exp in token")
 	}
@@ -52,11 +53,6 @@ func (s *JWTauthService) ValidateToken(tokenString string) (*entity.Claims, erro
 		return nil, errors.New("invalid UUID format")
 	}
 
-	email, ok := claims["email"].(string)
-	if !ok {
-		return nil, errors.New("invalid email in token")
-	}
-
 	roleStr, ok := claims["role"].(string)
 	if !ok {
 		return nil, errors.New("invalid role in token")
@@ -64,7 +60,6 @@ func (s *JWTauthService) ValidateToken(tokenString string) (*entity.Claims, erro
 
 	return &entity.Claims{
 		UserID: userID,
-		Email:  email,
 		Role:   entity.UserRole(roleStr),
 	}, nil
 }
