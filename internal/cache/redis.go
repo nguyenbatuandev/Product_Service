@@ -38,7 +38,6 @@ func NewRedisCache(addr string, password string, db int) *RedisCache {
 }
 
 func (r *RedisCache) Set(key string, value interface{}, expiration time.Duration) error {
-	log.Printf("Attempting to set Redis key: %s", key)
 	jsonData, err := json.Marshal(value)
 	if err != nil {
 		return err

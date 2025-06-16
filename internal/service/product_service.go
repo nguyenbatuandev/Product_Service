@@ -54,6 +54,8 @@ func (s *ProductService) UpdateProduct(id uuid.UUID, product *entity.UpdateReque
 		return nil, errors.New("product not found: " + err.Error())
 	}
 
+	oldName := existingProduct.Name
+
 	if product.Name != "" {
 		existingProduct.Name = product.Name
 	}
@@ -71,24 +73,36 @@ func (s *ProductService) UpdateProduct(id uuid.UUID, product *entity.UpdateReque
 		return nil, errors.New("failed to update product: " + err.Error())
 	}
 
-	cacheKey := fmt.Sprintf("product:%s", id.String())
-	_ = s.cacheService.Set(cacheKey, existingProduct, 60*time.Minute)
+	// Cập nhật cache
+	productKey := fmt.Sprintf("product:%s", id.String())
+	_ = s.cacheService.Set(productKey, existingProduct, 60*time.Minute)
+
+	// Xóa cache theo tên cũ và danh sách sản phẩm
+	nameKey := fmt.Sprintf("product_by_name:%s", oldName)
+	_ = s.cacheService.Delete(nameKey)
 	_ = s.cacheService.DeletePattern("products:all")
-	_ = s.cacheService.Delete("product:search:*")
 
 	return existingProduct, nil
 }
 
 func (s *ProductService) DeleteProduct(id uuid.UUID) error {
+	product, err := s.productRepo.GetProductByID(id)
+	if err != nil {
+		return errors.New("product not found: " + err.Error())
+	}
+
 	if err := s.productRepo.DeleteProduct(id); err != nil {
 		return errors.New("failed to delete product: " + err.Error())
 	}
 
-	cacheKey := fmt.Sprintf("product:%s", id.String())
-	_ = s.cacheService.Delete(cacheKey)
+	// Xóa cache cụ thể
+	productKey := fmt.Sprintf("product:%s", id.String())
+	nameKey := fmt.Sprintf("product_by_name:%s", product.Name)
 
+	_ = s.cacheService.Delete(productKey)
+	_ = s.cacheService.Delete(nameKey)
 	_ = s.cacheService.DeletePattern("products:all")
-	_ = s.cacheService.Delete("product:search:*")
+
 	return nil
 }
 
@@ -108,7 +122,9 @@ func (s *ProductService) GetProductByName(name string) ([]*entity.Product, error
 		return nil, errors.New("product not found: " + err.Error())
 	}
 
-	s.cacheService.Set(cacheKey, product, 60*time.Minute)
+	if err := s.cacheService.Set(cacheKey, product, 60*time.Minute); err != nil {
+		log.Printf("Failed to cache products: %v", err)
+	}
 
 	return product, nil
 }
@@ -134,13 +150,21 @@ func (s *ProductService) GetAllProducts() ([]*entity.Product, error) {
 }
 
 func (s *ProductService) DeleteProductByAdmin(id uuid.UUID) error {
+	product, err := s.productRepo.GetProductByID(id)
+	if err != nil {
+		return errors.New("product not found: " + err.Error())
+	}
+
 	if err := s.productRepo.DeleteProductByAdmin(id); err != nil {
 		return errors.New("failed to delete product by admin: " + err.Error())
 	}
 
-	cacheKey := fmt.Sprintf("product:%s", id.String())
-	_ = s.cacheService.Delete(cacheKey)
+	productKey := fmt.Sprintf("product:%s", id.String())
+	nameKey := fmt.Sprintf("product_by_name:%s", product.Name)
+
+	_ = s.cacheService.Delete(productKey)
+	_ = s.cacheService.Delete(nameKey)
 	_ = s.cacheService.DeletePattern("products:all")
-	_ = s.cacheService.Delete("product:search:*")
+
 	return nil
 }
