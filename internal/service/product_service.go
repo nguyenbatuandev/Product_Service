@@ -161,23 +161,3 @@ func (s *ProductService) GetAllProducts() ([]*entity.Product, error) {
 
 	return products, nil
 }
-
-func (s *ProductService) DeleteProductByAdmin(id uuid.UUID) error {
-	product, err := s.productRepo.GetProductByID(id)
-	if err != nil {
-		return errors.New("product not found: " + err.Error())
-	}
-
-	if err := s.productRepo.DeleteProductByAdmin(id); err != nil {
-		return errors.New("failed to delete product by admin: " + err.Error())
-	}
-
-	productKey := fmt.Sprintf("product:%s", id.String())
-	nameKey := fmt.Sprintf("product_by_name:%s", product.Name)
-
-	_ = s.cacheService.Delete(productKey)
-	_ = s.cacheService.Delete(nameKey)
-	_ = s.cacheService.DeletePattern("products:all")
-
-	return nil
-}

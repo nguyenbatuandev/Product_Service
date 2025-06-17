@@ -38,10 +38,10 @@ API sẽ chạy tại: `http://localhost:8082`
   GET /api/v1/product-name/{name}
   ```
 
-### Protected Endpoints (Partner/Admin Only)
+### Protected Endpoints (Admin Only)
 - **Create Product**
   ```
-  POST /api/v1/products
+  POST /api/admin/products
   Authorization: Bearer <token>
   {
     "name": "iPhone 15 Pro",
@@ -52,7 +52,7 @@ API sẽ chạy tại: `http://localhost:8082`
   ```
 - **Update Product**
   ```
-  PATCH /api/v1/products/{id}
+  PATCH /api/admin/products/{id}
   Authorization: Bearer <token>
   {
     "name": "Updated Name",
@@ -61,15 +61,8 @@ API sẽ chạy tại: `http://localhost:8082`
   ```
 - **Delete Product**
   ```
-  DELETE /api/v1/products/{id}
+  DELETE /api/admin/products/{id}
   Authorization: Bearer <token>
-  ```
-
-### Admin Endpoints
-- **Admin Delete Product**
-  ```
-  DELETE /api/admin/delete/{id}
-  Authorization: Bearer <admin-token>
   ```
 
 ---
@@ -157,11 +150,11 @@ curl -X GET http://localhost:8082/api/v1/product-id/f6ae861f-3828-4a26-9f70-631c
 curl -X GET http://localhost:8082/api/v1/product-name/iPhone
 ```
 
-### 2. Protected APIs (Cần JWT token - Partner/Admin)
+### 2. Protected APIs (Cần JWT token - Admin)
 
 **Tạo sản phẩm mới:**
 ```bash
-curl -X POST http://localhost:8082/api/v1/products \
+curl -X POST http://localhost:8082/api/admin/products \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -174,7 +167,7 @@ curl -X POST http://localhost:8082/api/v1/products \
 
 **Cập nhật sản phẩm:**
 ```bash
-curl -X PATCH http://localhost:8082/api/v1/products/f6ae861f-3828-4a26-9f70-631cde84b563 \
+curl -X PATCH http://localhost:8082/api/admin/products/f6ae861f-3828-4a26-9f70-631cde84b563 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -187,19 +180,9 @@ curl -X PATCH http://localhost:8082/api/v1/products/f6ae861f-3828-4a26-9f70-631c
 
 **Xóa sản phẩm:**
 ```bash
-curl -X DELETE http://localhost:8082/api/v1/products/f6ae861f-3828-4a26-9f70-631cde84b563 \
+curl -X DELETE http://localhost:8082/api/admin/products/f6ae861f-3828-4a26-9f70-631cde84b563 \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
-
-### 3. Admin Only APIs
-
-**Admin xóa sản phẩm:**
-```bash
-curl -X DELETE http://localhost:8082/api/admin/delete/f6ae861f-3828-4a26-9f70-631cde84b563 \
-  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"
-```
-
----
 
 ## 🔍 Kiểm tra Redis Cache
 

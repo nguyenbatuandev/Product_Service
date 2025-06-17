@@ -22,18 +22,12 @@ func NewProductHandler(productService _interface.ProductService, authService _in
 }
 
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
-	userId, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, entity.ErrorResponse{Error: "User not authenticated"})
-		return
-	}
 	var product entity.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
 		c.JSON(http.StatusBadRequest, entity.ErrorResponse{Error: err.Error()})
 		return
 	}
 	product.Id = uuid.New()
-	product.CreatedId = userId.(uuid.UUID)
 	createdProduct, err := h.productService.CreateProduct(&product)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, entity.ErrorResponse{Error: err.Error()})
@@ -72,36 +66,11 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	idStr := c.Param("id")
 
-	// Lấy user_id từ context
-	userIdVal, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, entity.ErrorResponse{Error: "User not authenticated"})
-		return
-	}
-
-	userId, ok := userIdVal.(uuid.UUID)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, entity.ErrorResponse{Error: "Invalid user ID type"})
-		return
-	}
 
 	// Parse product ID từ path
 	productID, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, entity.ErrorResponse{Error: "Invalid product ID"})
-		return
-	}
-
-	// Lấy product hiện tại để kiểm tra quyền sở hữu
-	existingProduct, err := h.productService.GetProductByID(productID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, entity.ErrorResponse{Error: "Product not found"})
-		return
-	}
-
-	// So sánh user_id và partner_id
-	if existingProduct.CreatedId != userId {
-		c.JSON(http.StatusForbidden, entity.ErrorResponse{Error: "You are not authorized to update this product"})
 		return
 	}
 
@@ -127,32 +96,6 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, entity.ErrorResponse{Error: "Invalid product ID"})
-		return
-	}
-
-	// Lấy user_id từ context
-	userIdVal, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, entity.ErrorResponse{Error: "User not authenticated"})
-		return
-	}
-
-	userId, ok := userIdVal.(uuid.UUID)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, entity.ErrorResponse{Error: "Invalid user ID type"})
-		return
-	}
-
-	// Lấy product hiện tại để kiểm tra quyền sở hữu
-	existingProduct, err := h.productService.GetProductByID(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, entity.ErrorResponse{Error: "Product not found"})
-		return
-	}
-
-	// So sánh user_id và partner_id
-	if existingProduct.CreatedId != userId {
-		c.JSON(http.StatusForbidden, entity.ErrorResponse{Error: "You are not authorized to delete this product"})
 		return
 	}
 
@@ -192,27 +135,6 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, entity.SuccessResponse{
 		Message: "Products retrieved successfully",
 		Data:    productsResponse,
-	})
-}
-
-func (h *ProductHandler) DeleteProductByAdmin(c *gin.Context) {
-	// Lấy ID sản phẩm từ tham số URL
-	idStr := c.Param("id")
-	id, err := uuid.Parse(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, entity.ErrorResponse{Error: "Invalid product ID"})
-		return
-	}
-
-	// Gọi service để xóa sản phẩm
-	if err := h.productService.DeleteProductByAdmin(id); err != nil {
-		c.JSON(http.StatusInternalServerError, entity.ErrorResponse{Error: err.Error()})
-		return
-	}
-
-	// Trả về kết quả thành công
-	c.JSON(http.StatusOK, entity.SuccessResponse{
-		Message: "Product deleted successfully",
 	})
 }
 

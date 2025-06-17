@@ -43,19 +43,15 @@ func main() {
 		v1.GET("/product-id/:id", productHandler.GetProductByID)
 		v1.GET("/products", productHandler.GetAllProducts)
 		v1.GET(("/product-name/:name"), productHandler.GetProductByName)
-		v1.Use(middleware.AuthMiddleware(authService), middleware.PartnerOnlyMiddleware())
-		{
-			v1.POST("/products", productHandler.CreateProduct)
-			v1.PATCH("/products/:id", productHandler.UpdateProduct)
-			v1.DELETE("/products/:id", productHandler.DeleteProduct)
-		}
 	}
 
 	v2 := r.Group("/api/admin")
 	{
 		v2.Use(middleware.AuthMiddleware(authService), middleware.AdminOnlyMiddleware())
 		{
-			v2.DELETE("/delete/:id", productHandler.DeleteProductByAdmin)
+			v2.POST("/products", productHandler.CreateProduct)
+			v2.PATCH("/products/:id", productHandler.UpdateProduct)
+			v2.DELETE("/products/:id", productHandler.DeleteProduct)
 		}
 	}
 

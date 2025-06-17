@@ -5,7 +5,7 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: product_db
-    restart: unless-stopped    
+    restart: unless-stopped
     environment:
       POSTGRES_DB: product_service_db
       POSTGRES_USER: postgres
@@ -16,6 +16,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - product_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # Redis Cache
   redis:
@@ -58,8 +63,10 @@ services:
       # JWT
       JWT_SECRET: qwertyuiopiuytsdfghjkllkjhgfddfghjklkjhgfddfghjkkj
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - product_network
 

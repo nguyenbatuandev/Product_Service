@@ -14,7 +14,6 @@ type ProductRepository interface {
 	DeleteProduct(id uuid.UUID) error
 	GetProductByName(name string) ([]*entity.Product, error)
 	GetAllProducts() ([]*entity.Product, error)
-	DeleteProductByAdmin(id uuid.UUID) error
 }
 
 type AuthService interface {
@@ -28,7 +27,6 @@ type ProductService interface {
 	DeleteProduct(id uuid.UUID) error
 	GetProductByName(name string) ([]*entity.Product, error)
 	GetAllProducts() ([]*entity.Product, error)
-	DeleteProductByAdmin(id uuid.UUID) error
 }
 
 type CacheService interface {

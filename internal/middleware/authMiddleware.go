@@ -70,29 +70,6 @@ func AdminOnlyMiddleware() gin.HandlerFunc {
 	}
 }
 
-func PartnerOnlyMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		role, exists := c.Get("user_role")
-		if !exists {
-			c.JSON(http.StatusForbidden, entity.ErrorResponse{
-				Error: "Access denied",
-			})
-			c.Abort()
-			return
-		}
-
-		if role != entity.PartnerRole {
-			c.JSON(http.StatusForbidden, entity.ErrorResponse{
-				Error: "Partner access required",
-			})
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
-}
-
 // CORSMiddleware handles CORS
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
